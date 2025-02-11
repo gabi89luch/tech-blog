@@ -59,7 +59,7 @@ resource "github_repository_webhook" "jenkins" {
   repository = github_repository.blog.name
   
   configuration {
-    url          = "http://your-jenkins-url/github-webhook/"
+    url          = "http://40.68.24.84:8080/github-webhook/"
     content_type = "json"
     insecure_ssl = false
   }
