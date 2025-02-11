@@ -1,0 +1,132 @@
+pipeline {
+    agent any
+    
+    environment {
+        GITHUB_TOKEN = credentials('github-token')
+        REPO_NAME = 'blog'
+        GITHUB_USER = 'gabi89luch'
+        WEBSITE_DIR = '.'
+        TF_VAR_github_token = credentials('github-token')
+    }
+    
+    triggers {
+        githubPush()
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                git branch: 'main',
+                    url: "https://github.com/gabi89luch/blog.git",
+                    credentialsId: 'github-credentials'
+            }
+        }
+        
+        stage('Terraform Init') {
+            steps {
+                script {
+                    sh 'terraform init -backend=true'
+                }
+            }
+        }
+        
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+        
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+        
+        stage('Validate Files') {
+            steps {
+                script {
+                    sh '''
+                        for file in *.html; do
+                            echo "Validating $file"
+                            tidy -q -e "$file" || true
+                        done
+                        
+                        if [ -d "css" ]; then
+                            for file in css/*.css; do
+                                echo "Checking $file"
+                                csslint "$file" || true
+                            done
+                        fi
+                    '''
+                }
+            }
+        }
+        
+        stage('Deploy to GitHub Pages') {
+            steps {
+                script {
+                    sh """
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins CI"
+                        
+                        if git show-ref --verify --quiet refs/heads/gh-pages; then
+                            git checkout gh-pages
+                        else
+                            git checkout -b gh-pages
+                        fi
+                        
+                        cp -r * ../temp/
+                        git rm -rf .
+                        cp -r ../temp/* .
+                        rm -rf ../temp
+                        
+                        git add .
+                        git commit -m "Deploy website update via Jenkins"
+                        git push origin gh-pages --force
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            script {
+                sh """
+                    curl -X POST \
+                    -H "Authorization: token ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/gabi89luch/blog/issues \
+                    -d '{
+                        "title": "✅ Deployment Successful",
+                        "body": "Infrastructure and website deployed successfully at ${new Date()}",
+                        "labels": ["deployment", "success"]
+                    }'
+                """
+            }
+        }
+        failure {
+            script {
+                sh """
+                    curl -X POST \
+                    -H "Authorization: token ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/gabi89luch/blog/issues \
+                    -d '{
+                        "title": "❌ Deployment Failed",
+                        "body": "Deployment failed at ${new Date()}",
+                        "labels": ["deployment", "failure"]
+                    }'
+                """
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
