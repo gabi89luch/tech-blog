@@ -5,36 +5,25 @@ pipeline {
         GITHUB_TOKEN = credentials('github-token')
         REPO_NAME = 'blog'
         GITHUB_USER = 'gabi89luch'
-        WEBSITE_DIR = '.'
-        TF_VAR_github_token = credentials('github-token')
-    }
-    
-    triggers {
-        githubPush()
     }
     
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
-                git branch: 'main',
-                    url: "https://github.com/gabi89luch/blog.git",
-                    credentialsId: 'github-credentials'
+                checkout scm
             }
         }
         
-        stage('Terraform Init') {
+        stage('Terraform Init & Plan') {
             steps {
                 script {
-                    sh 'terraform init -backend=true'
-                }
-            }
-        }
-        
-        stage('Terraform Plan') {
-            steps {
-                script {
-                    sh 'terraform plan -out=tfplan'
+                    // Set GitHub token for Terraform
+                    withCredentials([string(credentialsId: 'github-token', variable: 'TF_VAR_github_token')]) {
+                        sh '''
+                            terraform init
+                            terraform plan -out=tfplan
+                        '''
+                    }
                 }
             }
         }
@@ -42,20 +31,26 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
-                    sh 'terraform apply -auto-approve tfplan'
+                    withCredentials([string(credentialsId: 'github-token', variable: 'TF_VAR_github_token')]) {
+                        sh 'terraform apply -auto-approve tfplan'
+                    }
                 }
             }
         }
         
-        stage('Validate Files') {
+        stage('Validate Website Files') {
             steps {
                 script {
+                    // HTML validation
                     sh '''
                         for file in *.html; do
                             echo "Validating $file"
                             tidy -q -e "$file" || true
                         done
-                        
+                    '''
+                    
+                    // CSS validation
+                    sh '''
                         if [ -d "css" ]; then
                             for file in css/*.css; do
                                 echo "Checking $file"
@@ -70,25 +65,27 @@ pipeline {
         stage('Deploy to GitHub Pages') {
             steps {
                 script {
-                    sh """
-                        git config user.email "jenkins@example.com"
-                        git config user.name "Jenkins CI"
-                        
-                        if git show-ref --verify --quiet refs/heads/gh-pages; then
-                            git checkout gh-pages
-                        else
-                            git checkout -b gh-pages
-                        fi
-                        
-                        cp -r * ../temp/
-                        git rm -rf .
-                        cp -r ../temp/* .
-                        rm -rf ../temp
-                        
-                        git add .
-                        git commit -m "Deploy website update via Jenkins"
-                        git push origin gh-pages --force
-                    """
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                            git config user.email "jenkins@example.com"
+                            git config user.name "Jenkins CI"
+                            
+                            if git show-ref --verify --quiet refs/heads/gh-pages; then
+                                git checkout gh-pages
+                            else
+                                git checkout -b gh-pages
+                            fi
+                            
+                            cp -r * ../temp/
+                            git rm -rf .
+                            cp -r ../temp/* .
+                            rm -rf ../temp
+                            
+                            git add .
+                            git commit -m "Deploy website update via Jenkins"
+                            git push https://${GITHUB_TOKEN}@github.com/${GITHUB_USER}/${REPO_NAME}.git gh-pages --force
+                        '''
+                    }
                 }
             }
         }
@@ -101,10 +98,10 @@ pipeline {
                     curl -X POST \
                     -H "Authorization: token ${GITHUB_TOKEN}" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/gabi89luch/blog/issues \
+                    https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/issues \
                     -d '{
                         "title": "✅ Deployment Successful",
-                        "body": "Infrastructure and website deployed successfully at ${new Date()}",
+                        "body": "Infrastructure and website deployed successfully",
                         "labels": ["deployment", "success"]
                     }'
                 """
@@ -116,10 +113,10 @@ pipeline {
                     curl -X POST \
                     -H "Authorization: token ${GITHUB_TOKEN}" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/gabi89luch/blog/issues \
+                    https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/issues \
                     -d '{
                         "title": "❌ Deployment Failed",
-                        "body": "Deployment failed at ${new Date()}",
+                        "body": "Deployment failed - check Jenkins logs",
                         "labels": ["deployment", "failure"]
                     }'
                 """
