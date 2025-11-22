@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="The Open Source Hub - A technology blog covering science, hardware, software, and open source innovations. Explore the latest in tech, embedded systems, and Linux.">
+    <meta name="author" content="Gabriel Luchian">
+    <meta name="keywords" content="technology, open source, science, hardware, software, Linux, embedded systems, blog">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gabi89luch.github.io/tech-blog/">
+    <meta property="og:title" content="The Open Source Hub: Unleashing Technology, Science, Hardware, and Software">
+    <meta property="og:description" content="A technology blog covering science, hardware, software, and open source innovations.">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gabi89luch.github.io/tech-blog/">
+    <meta property="twitter:title" content="The Open Source Hub: Unleashing Technology, Science, Hardware, and Software">
+    <meta property="twitter:description" content="A technology blog covering science, hardware, software, and open source innovations.">
     <title>
       The Open Source Hub: Unleashing Technology, Science, Hardware, and
       Software
@@ -14,25 +25,15 @@
     <script
       src="https://use.fontawesome.com/releases/v6.1.0/js/all.js"
       crossorigin="anonymous"
+      defer
     ></script>
     <!-- Google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-      href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic"
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&family=Roboto:wght@400;500;700&display=swap"
       rel="stylesheet"
-      type="text/css"
     >
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800"
-      rel="stylesheet"
-      type="text/css"
-    >
-    <link
-      href="http://fonts.googleapis.com/css?family=Roboto"
-      rel="stylesheet"
-      type="text/css"
-    >
-    <!-- Google Maps script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZMwwL1hvA0CP1mgah6f1rxe8paenOxoo&signed_in=true&callback=initMap"></script>
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet">
     <!-- Link to your default CSS stylesheet (light mode) -->
@@ -120,15 +121,15 @@
               <h2 id="welcome-message">Welcome, Guest!</h2>
               <div class="content">
                 <label for="name" style="color: white;">Enter your name:</label>
-                <input type="text" id="name">
-                <button class="btn btn-primary" type="button" onclick="saveName()">Save</button>
+                <input type="text" id="name" aria-label="Enter your name">
+                <button class="btn btn-primary" type="button" id="saveNameBtn" aria-label="Save your name">Save</button>
               </div>
               <p>
                 <button
                 class="btn btn-primary"
                 type="button"
-                onclick="showPosition();"
-                data-tooltip="Click to get your location"
+                id="locationBtn"
+                aria-label="Get your current location"
                 >
                 Location
                  </button>
@@ -159,9 +160,9 @@
               Posted by
               <a
                 href="https://www.linkedin.com/in/valentin-g-luchian-178652170/"
-                onclick="window.open(this.href); return false;"
-                onkeypress="window.open(this.href); 
-                            return false;"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Gabriel L's LinkedIn profile"
                 >Gabriel L</a
               >
               on September 24, 2022
@@ -182,9 +183,9 @@
               Posted by
               <a
                 href="https://www.linkedin.com/in/valentin-g-luchian-178652170/"
-                onclick="window.open(this.href); return false;"
-                onkeypress="window.open(this.href); 
-                            return false;"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Gabriel L's LinkedIn profile"
                 >Gabriel L</a
               >
               on September 18, 2022
@@ -206,9 +207,9 @@
               Posted by
               <a
                 href="https://www.linkedin.com/in/valentin-g-luchian-178652170/"
-                onclick="window.open(this.href); return false;"
-                onkeypress="window.open(this.href); 
-                            return false;"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Gabriel L's LinkedIn profile"
                 >Gabriel L</a
               >
               on August 24, 2022
@@ -226,9 +227,9 @@
               Posted by
               <a
                 href="https://www.linkedin.com/in/valentin-g-luchian-178652170/"
-                onclick="window.open(this.href); return false;"
-                onkeypress="window.open(this.href); 
-                            return false;"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Gabriel L's LinkedIn profile"
                 >Gabriel L</a
               >
               on July 8, 2022
@@ -256,8 +257,9 @@
                 <!-- Personal Github, when clicked, opens the link in a new window -->
                 <a
                   href="https://github.com/gabi89luch"
-                  onclick="window.open(this.href); return false;"
-                  onkeypress="window.open(this.href); return false;"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit GitHub profile"
                 >
                   <span class="fa-stack fa-lg">
                     <i class="fas fa-circle fa-stack-2x"></i>
@@ -269,8 +271,9 @@
                 <!-- Personal LinkedIn, when clicked, opens the link in a new window -->
                 <a
                   href="https://www.linkedin.com/in/valentin-g-luchian-178652170/"
-                  onclick="window.open(this.href); return false;"
-                  onkeypress="window.open(this.href); return false;"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit LinkedIn profile"
                 >
                   <span class="fa-stack fa-lg">
                     <i class="fas fa-circle fa-stack-2x"></i>
@@ -286,13 +289,11 @@
         </div>
       </div>
       <!-- Scroll to top button -->
-      <a class="scrollTop" href="#"><i class="fa fa-chevron-up"></i></a>
-      <!-- jQuery script for scroll to the top -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <a class="scrollTop" href="#" aria-label="Scroll to top"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
     </footer>
     <!-- Bootstrap core JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
+    <script src="js/scripts.js" defer></script>
   </body>
 </html>

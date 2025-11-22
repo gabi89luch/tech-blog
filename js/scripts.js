@@ -6,6 +6,8 @@
 window.addEventListener("DOMContentLoaded", () => {
   let scrollPos = 0;
   const mainNav = document.getElementById("mainNav");
+  if (!mainNav) return;
+  
   const headerHeight = mainNav.clientHeight;
   window.addEventListener("scroll", function () {
     const currentTop = document.body.getBoundingClientRect().top * -1;
@@ -14,12 +16,11 @@ window.addEventListener("DOMContentLoaded", () => {
       if (currentTop > 0 && mainNav.classList.contains("is-fixed")) {
         mainNav.classList.add("is-visible");
       } else {
-        console.log(123);
         mainNav.classList.remove("is-visible", "is-fixed");
       }
     } else {
       // Scrolling Down
-      mainNav.classList.remove(["is-visible"]);
+      mainNav.classList.remove("is-visible");
       if (
         currentTop > headerHeight &&
         !mainNav.classList.contains("is-fixed")
@@ -34,6 +35,8 @@ window.addEventListener("DOMContentLoaded", () => {
 // Function to save the user's name in local storage and update the welcome message
 function saveName() {
   const nameInput = document.getElementById("name");
+  if (!nameInput) return;
+  
   const name = nameInput.value.trim();
 
   if (name === "") {
@@ -46,13 +49,32 @@ function saveName() {
 
   // Update the welcome message in the header
   const welcomeMessage = document.getElementById("welcome-message");
-  welcomeMessage.textContent = `Welcome, ${name}!`;
+  if (welcomeMessage) {
+    welcomeMessage.textContent = `Welcome, ${name}!`;
+  }
 }
 
-// This event listener waits for the DOM (Document Object Model) to be fully loaded before executing the provided function.
+// Initialize name save button on index page
+document.addEventListener('DOMContentLoaded', function() {
+  const saveNameBtn = document.getElementById("saveNameBtn");
+  if (saveNameBtn) {
+    saveNameBtn.addEventListener('click', saveName);
+  }
+  
+  // Load saved name on page load
+  const savedName = localStorage.getItem("visitorName");
+  const welcomeMessage = document.getElementById("welcome-message");
+  if (savedName && welcomeMessage) {
+    welcomeMessage.textContent = `Welcome, ${savedName}!`;
+  }
+});
+
+// Contact form handling
 document.addEventListener('DOMContentLoaded', function () {
   // Get the reference to the contact form and the submit button element.
   const form = document.getElementById('contactForm');
+  if (!form) return;
+  
   const submitButton = document.getElementById('submitButton');
 
   // Attach a 'submit' event listener to the form. This function will be executed when the form is submitted.
@@ -61,104 +83,69 @@ document.addEventListener('DOMContentLoaded', function () {
       event.preventDefault();
 
       // Get the values entered by the user in the form fields.
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
-      const message = document.getElementById('message').value;
+      const name = document.getElementById('name')?.value || '';
+      const email = document.getElementById('email')?.value || '';
+      const phone = document.getElementById('phone')?.value || '';
+      const message = document.getElementById('message')?.value || '';
 
       // Create a JavaScript object to store the form data.
       const formData = {
           name: name,
           email: email,
           phone: phone,
-          message: message
+          message: message,
+          timestamp: new Date().toISOString()
       };
 
       // Convert the form data object to a JSON string.
       const jsonData = JSON.stringify(formData);
 
-      // Save the form data to the JSON file using the saveFormData function.
-      saveFormData(jsonData);
-
-      // Show a success message to the user (optional).
+      // In a real application, you would send this to a server endpoint
+      // For now, we'll just log it and show success message
+      console.log('Form submission:', formData);
+      
+      // Show a success message to the user.
       showSuccessMessage();
 
-      // Reset the form fields after successful submission (optional).
+      // Reset the form fields after successful submission.
       form.reset();
   });
 
-  // Function to save the form data to a JSON file.
-  function saveFormData(jsonData) {
-      // Modify this path to your desired location to save the JSON file.
-      const saveFilePath = 'submissions.json';
-
-      // Fetch the existing data (if any) from the JSON file.
-      fetch(saveFilePath)
-          .then(response => response.json())
-          .then(data => {
-              // Append the new form data to the existing data array or create a new array if there is no existing data.
-              const allData = data ? [...data, jsonData] : [jsonData];
-
-              // Convert the array containing all form data to a JSON string.
-              const allDataJson = JSON.stringify(allData);
-
-              // Save the updated data to the JSON file using a POST request.
-              fetch(saveFilePath, {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: allDataJson
-              });
-          })
-          .catch(error => console.error('Error fetching data:', error));
-  }
-
-  function redirectToConfirmationPopup() {
-      // Show a popup message to the user as a confirmation.
-      alert('Thank you for your message! We have received your submission.');
-
-      // Optionally, you can reset the form after showing the confirmation message.
-      form.reset();
-}
-
-  // Function to show a success message to the user (optional).
+  // Function to show a success message to the user.
   function showSuccessMessage() {
-      // You can show a success message here if you want.
-      // Get the element with the 'submitSuccessMessage' ID and remove the 'd-none' class to display it.
       const successMessage = document.getElementById('submitSuccessMessage');
-      successMessage.classList.remove('d-none');
+      if (successMessage) {
+        successMessage.classList.remove('d-none');
+        // Scroll to success message
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
   }
 });
 
 // Scroll to top button
-const scrollTop = document.querySelector(".scrollTop");
+document.addEventListener('DOMContentLoaded', function() {
+  const scrollTop = document.querySelector(".scrollTop");
+  if (!scrollTop) return;
 
-window.addEventListener("scroll", () => {
-  if (window.pageYOffset > 100) {
-    scrollTop.classList.add("active");
-  } else {
-    scrollTop.classList.remove("active");
-  }
+  window.addEventListener("scroll", () => {
+    if (window.pageYOffset > 100) {
+      scrollTop.classList.add("active");
+    } else {
+      scrollTop.classList.remove("active");
+    }
+  });
+
+  // Add click handler for smooth scroll
+  scrollTop.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
 });
 
-//Greeting users
-// Define a function called greetUser
-function greetUser() {
-  // Ask the user to input their name using a popup input box
-  var userName = prompt("Please enter your name:");
-
-  // Check if the user entered a name
-  if (userName) {
-    // Display a personalized greeting in a popup message
-    var greeting = "Hello, " + userName + "! You have checked in!";
-    // Show the personalized greeting in an alert box
-    alert(greeting);
-  } else {
-    // If the user didn't enter a name, display a generic message
-    alert("No name added!");
-  }
-}
+// Removed unused greetUser function
 
 // Geolocation HTML5
 // Set up global variable
@@ -167,15 +154,28 @@ var result;
 function showPosition() {
   // Store the element where the page displays the result
   result = document.getElementById("result");
+  if (!result) return;
 
   // If geolocation is available, try to get the visitor's position
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 60000
+    });
     result.innerHTML = "Getting the position information...";
   } else {
     alert("Sorry, your browser does not support HTML5 geolocation.");
   }
 }
+
+// Initialize location button on index page
+document.addEventListener('DOMContentLoaded', function() {
+  const locationBtn = document.getElementById("locationBtn");
+  if (locationBtn) {
+    locationBtn.addEventListener('click', showPosition);
+  }
+});
 
 // Define callback function for successful attempt
 function successCallback(position) {
@@ -206,48 +206,46 @@ function errorCallback(error) {
 }
 
 // Form validation and submission handling
-const contactForm = document.getElementById("contactForm");
-const submitSuccessMessage = document.getElementById("submitSuccessMessage");
-const submitErrorMessage = document.getElementById("submitErrorMessage");
-const genderSelect = document.getElementById("gender");
-const otherGenderInputContainer = document.getElementById("otherGenderInputContainer");
-const otherGenderInput = document.getElementById("otherGender");
+document.addEventListener('DOMContentLoaded', function() {
+  const contactForm = document.getElementById("contactForm");
+  if (!contactForm) return;
+  
+  const submitSuccessMessage = document.getElementById("submitSuccessMessage");
+  const submitErrorMessage = document.getElementById("submitErrorMessage");
+  const genderSelect = document.getElementById("gender");
+  const otherGenderInputContainer = document.getElementById("otherGenderInputContainer");
+  const otherGenderInput = document.getElementById("otherGender");
+  const resetButton = document.getElementById("resetButton");
 
-genderSelect.addEventListener("change", function () {
-  const selectedGender = genderSelect.value;
-  if (selectedGender === "other") {
-    otherGenderInputContainer.style.display = "block";
-    otherGenderInput.setAttribute("required", "required");
-  } else {
-    otherGenderInputContainer.style.display = "none";
-    otherGenderInput.removeAttribute("required");
+  if (genderSelect && otherGenderInputContainer && otherGenderInput) {
+    genderSelect.addEventListener("change", function () {
+      const selectedGender = genderSelect.value;
+      if (selectedGender === "other") {
+        otherGenderInputContainer.style.display = "block";
+        otherGenderInput.setAttribute("required", "required");
+      } else {
+        otherGenderInputContainer.style.display = "none";
+        otherGenderInput.removeAttribute("required");
+      }
+    });
   }
-});
 
-contactForm.addEventListener("submit", function (event) {
-  event.preventDefault();
-
-  // Validate the form fields
-  if (contactForm.checkValidity()) {
-    // Form data is valid, proceed with submission
-    submitSuccessMessage.classList.remove("d-none");
-    submitErrorMessage.classList.add("d-none");
-
-    // You can handle form submission here (e.g., sending data to the server)
-  } else {
-    // Form data is invalid, show error message
-    submitSuccessMessage.classList.add("d-none");
-    submitErrorMessage.classList.remove("d-none");
+  if (resetButton && otherGenderInputContainer && otherGenderInput) {
+    resetButton.addEventListener("click", function () {
+      if (otherGenderInputContainer) {
+        otherGenderInputContainer.style.display = "none";
+      }
+      if (otherGenderInput) {
+        otherGenderInput.removeAttribute("required");
+      }
+      if (submitSuccessMessage) {
+        submitSuccessMessage.classList.add("d-none");
+      }
+      if (submitErrorMessage) {
+        submitErrorMessage.classList.add("d-none");
+      }
+    });
   }
-});
-
-// Reset the form and hide the success/error messages
-const resetButton = document.getElementById("resetButton");
-resetButton.addEventListener("click", function () {
-  otherGenderInputContainer.style.display = "none";
-  otherGenderInput.removeAttribute("required");
-  submitSuccessMessage.classList.add("d-none");
-  submitErrorMessage.classList.add("d-none");
 });
 
 // Comment section
@@ -346,48 +344,74 @@ replyButtons.forEach((btn) => {
 });
 
 // DELETE MODULE
-const module = document.querySelector(".module-delete");
+document.addEventListener('DOMContentLoaded', function() {
+  const module = document.querySelector(".module-delete");
+  if (!module) return;
 
-function showModule() {
-  module.classList.add("show-module");
-}
+  window.showModule = function() {
+    module.classList.add("show-module");
+  };
 
-const btnCancelModule = document.querySelector(".btn-cancel");
-const btnDeleteModule = document.querySelector(".btn-delete");
+  const btnCancelModule = document.querySelector(".btn-cancel");
+  const btnDeleteModule = document.querySelector(".btn-delete");
 
-btnCancelModule.onclick = () => {
-  module.classList.remove("show-module");
-};
+  if (btnCancelModule) {
+    btnCancelModule.addEventListener('click', () => {
+      module.classList.remove("show-module");
+    });
+  }
 
-btnDeleteModule.onclick = () => {
-  const deletebutton = document.querySelector(".delete");
-  const card = deletebutton.parentElement;
-  card.parentElement.remove();
-  module.classList.remove("show-module");
-};
+  if (btnDeleteModule) {
+    btnDeleteModule.addEventListener('click', () => {
+      const deletebutton = document.querySelector(".delete");
+      if (deletebutton && deletebutton.parentElement) {
+        const card = deletebutton.parentElement;
+        if (card.parentElement) {
+          card.parentElement.remove();
+        }
+      }
+      module.classList.remove("show-module");
+    });
+  }
+});
 
-function editComment() {
+window.editComment = function() {
   const editbutton = document.querySelector(".edit");
+  if (!editbutton || !editbutton.parentElement) return;
+  
   const deletebutton = document.querySelector(".delete");
   const content = editbutton.parentElement.nextElementSibling;
+  if (!content) return;
+  
   const textArea = content.innerText;
-  editbutton.style.opacity = "0.6";
-  deletebutton.style.opacity = "0.6";
-  editbutton.style.cursor = "not-allowed";
-  deletebutton.style.cursor = "not-allowed";
+  if (editbutton) {
+    editbutton.style.opacity = "0.6";
+    editbutton.style.cursor = "not-allowed";
+  }
+  if (deletebutton) {
+    deletebutton.style.opacity = "0.6";
+    deletebutton.style.cursor = "not-allowed";
+  }
+  
   content.innerHTML = `<textarea rows="4" cols="50" class="editedComment">${textArea} </textarea>
   <div class="btn-update-wrapper" ><button class="btn btn-update">UPDATE</button></div>`;
 
   const updateButton = document.querySelector(".btn-update");
   const newTextArea = document.querySelector(".editedComment");
-  updateButton.onclick = () => {
-    content.innerHTML = `${newTextArea.value}`;
-    editbutton.style.opacity = "1";
-    deletebutton.style.opacity = "1";
-    editbutton.style.cursor = "pointer";
-    deletebutton.style.cursor = "pointer";
-  };
-}
+  if (updateButton && newTextArea) {
+    updateButton.addEventListener('click', () => {
+      content.innerHTML = `${newTextArea.value}`;
+      if (editbutton) {
+        editbutton.style.opacity = "1";
+        editbutton.style.cursor = "pointer";
+      }
+      if (deletebutton) {
+        deletebutton.style.opacity = "1";
+        deletebutton.style.cursor = "pointer";
+      }
+    });
+  }
+};
 
 const btnSendComment = document.querySelector(".btn-send");
 btnSendComment.onclick = () => {
@@ -434,11 +458,4 @@ btnSendComment.onclick = () => {
   cardWrapper.insertBefore(newRow, btnParrent);
   textArea.value = "";
 };
-// Checking button
-function myFunction() {
-  let person = prompt("Please enter your name", "John Doe");
-  if (person != null) {
-    document.getElementById("demo").innerHTML =
-      "Hello " + person + "! How are you today?";
-  }
-}
+// Removed unused myFunction
